@@ -2,6 +2,7 @@
  * Simple JWT-based authentication system
  * Works with Airtable member database
  */
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { airtableService, Member } from './airtable';
 
@@ -88,16 +89,18 @@ class AuthService {
    * Could integrate with Google Workspace, or use bcrypt for stored passwords
    */
   private async verifyPassword(email: string, password: string): Promise<boolean> {
-    // Implementation depends on your password strategy:
-    
-    // Option 1: Google Workspace SSO
-    // Option 2: Passwords stored in Airtable (hashed)
-    // Option 3: Magic link authentication
-    
-    // For demo purposes, return true
-    // In production, implement proper password verification
-    return true;
-  }
+    // 1. Get the member from Airtable
+    const member = await airtableService.getMemberByEmail(email);
+
+    // 2. Check if the member and their stored password hash exist
+    if (!member || !member.passwordHash) {
+        // No user or no password stored for them
+        return false;
+    }
+
+    // 3. Securely compare the provided password with the stored hash
+    return await bcrypt.compare(password, member.passwordHash);
+}
 
   /**
    * Generate magic link for passwordless login
