@@ -2,10 +2,11 @@
  * Type definitions for ClinicalRxQ application
  */
 
-export interface User {
+export interface Member {
   id: string;
   email: string;
   name: string;
+  passwordHash: string;
   role: 'member' | 'admin';
   subscription?: Subscription;
   createdAt: Date;

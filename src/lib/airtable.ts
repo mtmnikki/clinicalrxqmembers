@@ -11,6 +11,7 @@ interface Member {
   accessiblePrograms: string[];
   isActive: boolean;
   joinDate: string;
+  passwordHash?: string;
 }
 
 interface AirtableRecord {
@@ -22,6 +23,7 @@ interface AirtableRecord {
     'Accessible Programs': string[];
     'Is Active': boolean;
     'Join Date': string;
+    'Password Hash'?: string;
   };
 }
 
@@ -106,7 +108,8 @@ class AirtableService {
       membershipLevel: record.fields['Membership Level'] as Member['membershipLevel'],
       accessiblePrograms: record.fields['Accessible Programs'] || [],
       isActive: record.fields['Is Active'],
-      joinDate: record.fields['Join Date']
+      joinDate: record.fields['Join Date'],
+      passwordHash: record.fields['Password Hash']
     };
   }
 }
