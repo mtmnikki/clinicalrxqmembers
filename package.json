@@ -1,10 +1,12 @@
 {
   "name": "web-creator",
   "version": "1.0.0",
-  "scripts": {
-    "dev": "node scripts/build.mjs",
-    "build": "node scripts/build.mjs --production"
-  },
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+  "preview": "vite preview"
+},
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
