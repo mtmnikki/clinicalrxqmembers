@@ -51,7 +51,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
    * Lifecycle: side-effect logging (optional)
    */
   componentDidCatch(error: unknown, errorInfo: unknown) {
-    // eslint-disable-next-line no-console
+     
     console.error('Caught by ErrorBoundary:', error, errorInfo);
   }
 

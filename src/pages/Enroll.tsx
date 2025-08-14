@@ -88,7 +88,7 @@ export default function Enroll() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle enrollment submission
-    // eslint-disable-next-line no-console
+     
     console.log('Enrollment submitted', { selectedProgram, billingInfo });
   };
 

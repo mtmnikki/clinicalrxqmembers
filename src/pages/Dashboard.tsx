@@ -134,7 +134,7 @@ export default function Dashboard() {
         setActivity(a);
         setAnn(an);
       } catch (e) {
-        // eslint-disable-next-line no-console
+         
         console.error('Error loading dashboard data:', e);
       }
     }

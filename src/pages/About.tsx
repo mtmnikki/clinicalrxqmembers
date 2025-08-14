@@ -105,7 +105,7 @@ export default function About() {
             About ClinicalRxQ
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-            We're transforming community pharmacy from product-centric dispensaries into 
+            We&apos;re transforming community pharmacy from product-centric dispensaries into 
             patient-centered, decentralized healthcare hubs through comprehensive training 
             and turnkey clinical infrastructure.
           </p>
@@ -127,7 +127,7 @@ export default function About() {
                 <CardContent className="p-8">
                   <Quote className="h-8 w-8 text-cyan-400 mb-4 mx-auto" />
                   <p className="text-2xl font-bold text-gray-800 mb-6 leading-relaxed">
-                    "Retail is a FOUR-LETTER Word. We are COMMUNITY PHARMACISTS."
+                    {"Retail is a FOUR-LETTER Word. We are COMMUNITY PHARMACISTS."}
                   </p>
                   <p className="text-lg text-gray-700 mb-4">
                     Retailers sell product. Community Pharmacists deliver medical treatments. 
@@ -274,7 +274,7 @@ export default function About() {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We don't just teach clinical knowledge—we provide the complete infrastructure 
+              We don&apos;t just teach clinical knowledge—we provide the complete infrastructure 
               for successful implementation
             </p>
           </div>

@@ -373,8 +373,8 @@ export default function Contact() {
             Transform Your Practice Today
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Don't let another day pass with missed clinical opportunities. 
-            Start building the patient-centered practice you've always envisioned.
+            Don&apos;t let another day pass with missed clinical opportunities. 
+            Start building the patient-centered practice you&apos;ve always envisioned.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/">

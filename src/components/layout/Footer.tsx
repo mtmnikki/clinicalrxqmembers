@@ -53,7 +53,7 @@ export default function Footer() {
               professionals with comprehensive training and resources to enhance patient care and business success.
             </p>
             <div className="italic text-cyan-400 mb-6">
-              "Retail is a FOUR-LETTER Word. We are COMMUNITY PHARMACISTS."
+              &quot;Retail is a FOUR-LETTER Word. We are COMMUNITY PHARMACISTS.&quot;
             </div>
             
             {/* Contact Info */}
