@@ -12,13 +12,14 @@ import {
   TrendingUp, 
   Award, 
   Users, 
-  Award,
   CheckCircle,
   ArrowRight,
   Target,
   Heart,
   Zap
 } from 'lucide-react';
+import { Link } from 'react-router';
+import SafeText from '../components/common/SafeText';
 
 export default function SuccessStories() {
   const stories = [
@@ -185,7 +186,7 @@ export default function SuccessStories() {
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-600 to-cyan-500"></div>
-        <div className="absolute inset-0 bg-[url('https://pub-cdn.sider.ai/u/U03VH4NVNOE/web-coder/687655a5b1dac45b18db4f5c/resource/68768169b94605c50d9bc73f')] bg-center bg-cover opacity-20"></div>
+        <div className="absolute inset-0 bg-[url('https://pub-cdn.sider.ai/u/U03VH4NVNOE/web-coder/687655a5b1dac45b18db4f5c/resource/cd53336d-d6e2-4c6b-bf62-bba9d1f359ba.png')] bg-center bg-cover opacity-20"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
           <div className="mb-6">
@@ -224,9 +225,11 @@ export default function SuccessStories() {
                     <metric.icon className="h-8 w-8 text-white" />
                   </div>
                   <div className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
-                    {metric.value}
+                    <SafeText value={metric.value} />
                   </div>
-                  <div className="text-sm text-gray-600">{metric.label}</div>
+                  <div className="text-sm text-gray-600">
+                    <SafeText value={metric.label} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -254,9 +257,15 @@ export default function SuccessStories() {
                   <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg mx-auto mb-4">
                     <stat.icon className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-sm font-semibold text-gray-800 mb-1">{stat.label}</div>
-                  <div className="text-xs text-gray-600">{stat.description}</div>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    <SafeText value={stat.value} />
+                  </div>
+                  <div className="text-sm font-semibold text-gray-800 mb-1">
+                    <SafeText value={stat.label} />
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    <SafeText value={stat.description} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -297,16 +306,24 @@ export default function SuccessStories() {
                     
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{story.name}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          <SafeText value={story.name} />
+                        </h3>
                         <div className="flex">
                           {[...Array(story.rating)].map((_, i) => (
                             <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-600 text-sm mb-1">{story.role}</p>
-                      <p className="text-gray-500 text-xs mb-2">{story.location}</p>
-                      <Badge variant="secondary" className="text-xs">{story.program}</Badge>
+                      <p className="text-gray-600 text-sm mb-1">
+                        <SafeText value={story.role} />
+                      </p>
+                      <p className="text-gray-500 text-xs mb-2">
+                        <SafeText value={story.location} />
+                      </p>
+                      <Badge variant="secondary" className="text-xs">
+                        <SafeText value={story.program} />
+                      </Badge>
                     </div>
                   </div>
                   
@@ -314,22 +331,28 @@ export default function SuccessStories() {
                   <div className="relative mb-6">
                     <Quote className="absolute -top-2 -left-2 h-6 w-6 text-purple-200" />
                     <blockquote className="text-gray-700 italic pl-6 leading-relaxed">
-                      "{story.story}"
+                      &quot;<SafeText value={story.story} />&quot;
                     </blockquote>
                   </div>
                   
                   {/* Metrics */}
                   <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-purple-600">{story.metrics.services}</div>
+                      <div className="text-lg font-bold text-purple-600">
+                        <SafeText value={story.metrics.services} />
+                      </div>
                       <div className="text-xs text-gray-600">Services Delivered</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-purple-600">{story.metrics.patients}</div>
+                      <div className="text-lg font-bold text-purple-600">
+                        <SafeText value={story.metrics.patients} />
+                      </div>
                       <div className="text-xs text-gray-600">Patients Served</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-purple-600">{story.metrics.satisfaction}</div>
+                      <div className="text-lg font-bold text-purple-600">
+                        <SafeText value={story.metrics.satisfaction} />
+                      </div>
                       <div className="text-xs text-gray-600">Satisfaction</div>
                     </div>
                   </div>
@@ -341,7 +364,9 @@ export default function SuccessStories() {
                       {story.achievements.map((achievement, i) => (
                         <li key={i} className="flex items-start gap-2">
                           <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700 text-sm">{achievement}</span>
+                          <span className="text-gray-700 text-sm">
+                            <SafeText value={achievement} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -364,21 +389,25 @@ export default function SuccessStories() {
             with ClinicalRxQ's proven methodology and comprehensive support.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-white text-purple-600 hover:bg-gray-100 shadow-lg"
-            >
-              <Target className="mr-2 h-5 w-5" />
-              Start Your Transformation
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-purple-600"
-            >
-              Schedule Consultation
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to="/enroll">
+              <Button 
+                size="lg" 
+                className="bg-white text-purple-600 hover:bg-gray-100 shadow-lg"
+              >
+                <Target className="mr-2 h-5 w-5" />
+                Start Your Transformation
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="bg-transparent border-white text-white hover:bg-white hover:text-purple-600"
+              >
+                Schedule Consultation
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

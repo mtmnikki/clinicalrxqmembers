@@ -1,353 +1,335 @@
 /**
- * Member dashboard with account management and progress tracking
+ * Dashboard page
+ * - Purpose: Rich member dashboard with programs, quick access, bookmarks, activity, and announcements.
+ * - Update: Remove dates under welcome message; simplify resource cards (icon + name + download/watch).
+ * - Desktop-dense pass: compact typography, smaller paddings, tighter grid gaps.
  */
-import { useState } from 'react';
-import { Link } from 'react-router';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import AppShell from '../components/layout/AppShell';
+import { useAuth } from '../components/auth/AuthContext';
+import { Api } from '../services/api';
+import {
+  Announcement,
+  ClinicalProgram,
+  QuickAccessItem,
+  RecentActivity,
+  ResourceItem,
+} from '../services/api/types';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Progress } from '../components/ui/progress';
 import { Badge } from '../components/ui/badge';
-import { 
-  User, 
-  BookOpen, 
-  Award, 
-  Calendar, 
-  Clock, 
-  Play,
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import {
+  ArrowRight,
+  Download,
+  PlayCircle,
   FileText,
-  Settings,
-  CreditCard
 } from 'lucide-react';
-import { useAuthStore } from '../stores/authStore';
+import { Link } from 'react-router';
+import AirtableStatus from '../components/ui/AirtableStatus';
+import MemberSidebar from '../components/layout/MemberSidebar';
 
-export default function Dashboard() {
-  const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('overview');
+/**
+ * Helper: map string icon names to lucide-react components safely.
+ */
+function iconByName(name?: string) {
+  switch ((name || '').trim()) {
+    case 'ClipboardCheck':
+      return require('lucide-react').ClipboardCheck;
+    case 'CalendarCheck':
+      return require('lucide-react').CalendarCheck;
+    case 'Stethoscope':
+      return require('lucide-react').Stethoscope;
+    case 'Activity':
+      return require('lucide-react').Activity;
+    case 'FileText':
+      return require('lucide-react').FileText;
+    case 'FileSpreadsheet':
+      return require('lucide-react').FileSpreadsheet;
+    case 'TestTubes':
+      return require('lucide-react').TestTubes;
+    case 'PlayCircle':
+      return require('lucide-react').PlayCircle;
+    case 'Star':
+      return require('lucide-react').Star;
+    default:
+      return ArrowRight;
+  }
+}
 
-  const enrolledPrograms = [
-    {
-      id: 'clinical-fundamentals',
-      title: 'Clinical Pharmacy Fundamentals',
-      progress: 65,
-      totalModules: 12,
-      completedModules: 8,
-      nextModule: 'Advanced Drug Interactions',
-      dueDate: '2024-01-15',
-      status: 'active'
-    }
-  ];
+/**
+ * Helper UI chips (compact)
+ */
+const StatChip: React.FC<{ label: string }> = ({ label }) => (
+  <div className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700">{label}</div>
+);
 
-  const recentActivity = [
-    { action: 'Completed Module 8', program: 'Clinical Pharmacy Fundamentals', date: '2024-01-10' },
-    { action: 'Downloaded Resource', program: 'Clinical Pharmacy Fundamentals', date: '2024-01-09' },
-    { action: 'Joined Live Session', program: 'Clinical Pharmacy Fundamentals', date: '2024-01-08' }
-  ];
-
-  const upcomingEvents = [
-    { title: 'Live Q&A Session', date: '2024-01-12', time: '2:00 PM EST' },
-    { title: 'Module 9 Due', date: '2024-01-15', time: '11:59 PM EST' }
-  ];
+/**
+ * Quick access card component (compact, simplified)
+ * - Shows icon + title + action button only.
+ * - If the item is a video and duration is available, show a small duration line.
+ */
+const QuickCard: React.FC<{ item: QuickAccessItem }> = ({ item }) => {
+  const Icon = iconByName(item.icon);
+  const isVideo = (item as any)?.mediaType === 'video' || item.cta === 'Watch';
+  const duration = (item as any)?.duration as string | undefined;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName}!</h1>
-          <p className="text-gray-600">Track your progress and manage your learning journey</p>
+    <Card className="hover:shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-slate-600" />
+          <CardTitle className="text-sm">{item.title}</CardTitle>
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="programs">My Programs</TabsTrigger>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Active Programs</p>
-                      <p className="text-2xl font-bold">1</p>
-                    </div>
-                    <BookOpen className="h-8 w-8 text-blue-600" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Overall Progress</p>
-                      <p className="text-2xl font-bold">65%</p>
-                    </div>
-                    <Award className="h-8 w-8 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Hours Completed</p>
-                      <p className="text-2xl font-bold">24</p>
-                    </div>
-                    <Clock className="h-8 w-8 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Certifications</p>
-                      <p className="text-2xl font-bold">0</p>
-                    </div>
-                    <Award className="h-8 w-8 text-orange-600" />
-                  </div>
-                </CardContent>
-              </Card>
+        {isVideo && duration ? (
+          <div className="text-[11px] text-slate-500">{duration}</div>
+        ) : null}
+      </CardHeader>
+      <CardContent>
+        {isVideo ? (
+          <Button variant="secondary" className="h-8 w-full px-3">
+            <PlayCircle className="mr-2 h-3.5 w-3.5" />
+            Watch
+          </Button>
+        ) : (
+          <Button variant="secondary" className="h-8 w-full px-3">
+            <Download className="mr-2 h-3.5 w-3.5" />
+            Download
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+/**
+ * Dashboard component (compact)
+ */
+export default function Dashboard() {
+  const { member } = useAuth();
+  const [programs, setPrograms] = useState<ClinicalProgram[]>([]);
+  const [quick, setQuick] = useState<QuickAccessItem[]>([]);
+  const [bookmarks, setBookmarks] = useState<ResourceItem[]>([]);
+  const [activity, setActivity] = useState<RecentActivity[]>([]);
+  const [ann, setAnn] = useState<Announcement[]>([]);
+
+  /**
+   * Load dashboard data in parallel.
+   */
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const [p, q, b, a, an] = await Promise.all([
+          Api.getPrograms(),
+          Api.getQuickAccess(),
+          Api.getBookmarkedResources(),
+          Api.getRecentActivity(),
+          Api.getAnnouncements(),
+        ]);
+        if (!mounted) return;
+        setPrograms(p);
+        setQuick(q);
+        setBookmarks(b);
+        setActivity(a);
+        setAnn(an);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Error loading dashboard data:', e);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  /** Compute subscription color chip */
+  const subColor = useMemo(() => {
+    switch (member?.subscriptionStatus) {
+      case 'Active':
+        return 'bg-green-100 text-green-700';
+      case 'Expiring':
+        return 'bg-amber-100 text-amber-700';
+      case 'Expired':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-blue-100 text-blue-700';
+    }
+  }, [member?.subscriptionStatus]);
+
+  return (
+    <AppShell
+      header={
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-3 py-3 text-[13px]">
+          <div>
+            <div className="text-lg font-semibold">Welcome back, {member?.pharmacyName ?? 'Member'}</div>
+            {/* Meta row: keep useful context chips, remove dates */}
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-slate-600">
+              <span className={`rounded-full px-2 py-0.5 text-[11px] ${subColor}`}>
+                {member?.subscriptionStatus ?? 'Active'}
+              </span>
+              <AirtableStatus />
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Current Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {enrolledPrograms.map((program) => (
-                    <div key={program.id} className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold">{program.title}</h3>
-                          <p className="text-sm text-gray-600">
-                            {program.completedModules} of {program.totalModules} modules completed
-                          </p>
-                        </div>
-                        <Badge variant="default">Active</Badge>
+          </div>
+          <Link to="/resources">
+            <Button variant="outline" className="bg-transparent h-8 px-3">
+              Browse Resources
+            </Button>
+          </Link>
+        </div>
+      }
+      sidebar={<MemberSidebar />}
+    >
+      {/* Programs overview */}
+      <section className="mb-6">
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold">Clinical Programs</h2>
+          <div className="flex items-center gap-1.5">
+            <StatChip label="49+ Active Pharmacies" />
+            <StatChip label="HIPAA Compliant" />
+            <StatChip label="Updated Monthly" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {programs.map((p) => {
+            const Icon = iconByName(p.icon);
+            return (
+              <Link key={p.slug} to={`/program/${p.slug}`}>
+                <Card className="group border-blue-50 hover:border-blue-200 hover:shadow-md">
+                  <CardHeader className="pb-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-blue-600" />
+                        <CardTitle className="text-sm">{p.name}</CardTitle>
                       </div>
-                      
-                      <Progress value={program.progress} className="w-full" />
-                      
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="text-sm font-medium">Next: {program.nextModule}</p>
-                          <p className="text-xs text-gray-500">Due: {program.dueDate}</p>
-                        </div>
-                        <Button size="sm">
-                          <Play className="h-4 w-4 mr-1" />
-                          Continue
-                        </Button>
-                      </div>
+                      <Badge variant="secondary" className="text-[11px]">
+                        {p.resourceCount} resources
+                      </Badge>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upcoming Events</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {upcomingEvents.map((event, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full"></div>
-                        <div>
-                          <p className="font-medium">{event.title}</p>
-                          <p className="text-sm text-gray-600">{event.date} at {event.time}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Access</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Link to="/member-content">
-                    <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Access Member Content
+                    <div className="text-[12px] text-slate-500">
+                      Updated {p.lastUpdatedISO ? new Date(p.lastUpdatedISO).toLocaleDateString() : '—'}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-[13px] text-slate-600">{p.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Quick access */}
+      <section className="mb-6">
+        <h2 className="mb-2.5 text-base font-semibold">Quick Access</h2>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {quick.map((q) => (
+            <QuickCard key={q.id} item={q} />
+          ))}
+        </div>
+      </section>
+
+      {/* Bookmarked resources */}
+      <section className="mb-6">
+        <div className="mb-2.5 flex items-center justify-between">
+          <h2 className="text-base font-semibold">Your Bookmarked Resources</h2>
+          <Link to="/resources" className="text-[12px] text-blue-700 hover:underline">
+            View All
+          </Link>
+        </div>
+        {bookmarks.length === 0 ? (
+          <div className="rounded-md border border-dashed p-4 text-[13px] text-slate-600">
+            No bookmarks yet. Explore the Resource Library and add bookmarks for quick access.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {bookmarks.map((b) => {
+              // Lightweight heuristics for icon + optional duration if it's a video
+              const isVideo =
+                (b as any)?.mediaType === 'video' ||
+                typeof (b as any)?.duration === 'string' ||
+                String((b as any)?.type || '').toLowerCase() === 'video';
+              const duration = (b as any)?.duration as string | undefined;
+
+              return (
+                <Card key={b.id} className="hover:shadow-sm">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      {isVideo ? (
+                        <PlayCircle className="h-4 w-4 text-slate-600" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-slate-600" />
+                      )}
+                      <CardTitle className="text-[13px]">{b.name}</CardTitle>
+                    </div>
+                    {isVideo && duration ? (
+                      <div className="text-[11px] text-slate-500">{duration}</div>
+                    ) : null}
+                  </CardHeader>
+                  <CardContent>
+                    <Button size="sm" variant="secondary" className="h-8 w-full px-3">
+                      <Download className="mr-2 h-3.5 w-3.5" />
+                      Download
                     </Button>
-                  </Link>
-                  <Link to="/resources">
-                    <Button variant="outline" className="w-full">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Resource Library
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Recent activity and announcements (unchanged functionally) */}
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <Card>
+            <CardHeader className="pb-1.5">
+              <CardTitle className="text-sm">Recently Accessed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="divide-y">
+                {activity.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between py-2">
+                    <div>
+                      <div className="text-[13px] font-medium">{a.name}</div>
+                      <div className="text-[12px] text-slate-500">
+                        {a.program?.toUpperCase()} • {new Date(a.accessedAtISO).toLocaleString()}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" className="bg-transparent h-8 px-3">
+                      <Download className="mr-2 h-3.5 w-3.5" />
+                      Re-download
                     </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full"></div>
-                      <div>
-                        <p className="font-medium">{activity.action}</p>
-                        <p className="text-sm text-gray-600">{activity.program} • {activity.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="programs">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Programs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {enrolledPrograms.map((program) => (
-                    <div key={program.id} className="border rounded-lg p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold">{program.title}</h3>
-                          <p className="text-gray-600">
-                            {program.completedModules} of {program.totalModules} modules completed
-                          </p>
-                        </div>
-                        <Badge variant="default">Active</Badge>
-                      </div>
-                      
-                      <Progress value={program.progress} className="w-full mb-4" />
-                      
-                      <div className="flex gap-4">
-                        <Button>
-                          <Play className="h-4 w-4 mr-2" />
-                          Continue Learning
-                        </Button>
-                        <Button variant="outline">
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Resources
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="account">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Account Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">First Name</label>
-                      <input 
-                        type="text" 
-                        value={user?.firstName || ''} 
-                        className="w-full p-2 border rounded-md"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Last Name</label>
-                      <input 
-                        type="text" 
-                        value={user?.lastName || ''} 
-                        className="w-full p-2 border rounded-md"
-                        readOnly
-                      />
-                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
-                    <input 
-                      type="email" 
-                      value={user?.email || ''} 
-                      className="w-full p-2 border rounded-md"
-                      readOnly
-                    />
-                  </div>
-                  
-                  <Button>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="billing">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Billing & Subscriptions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-semibold mb-4">Active Subscriptions</h3>
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Clinical Pharmacy Fundamentals</p>
-                          <p className="text-sm text-gray-600">Next billing: January 15, 2024</p>
-                        </div>
-                        <Badge variant="default">Active</Badge>
-                      </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <Card>
+            <CardHeader className="pb-1.5">
+              <CardTitle className="text-sm">Announcements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {ann.map((an) => (
+                  <div key={an.id} className="rounded-md border p-2.5">
+                    <div className="text-[13px] font-semibold">{an.title}</div>
+                    <div className="text-[12px] text-slate-500">
+                      {new Date(an.dateISO).toLocaleDateString()}
                     </div>
+                    <div className="mt-0.5 text-[13px] text-slate-700">{an.body}</div>
                   </div>
-                  
-                  <div>
-                    <h3 className="font-semibold mb-4">Payment Method</h3>
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">•••• •••• •••• 1234</p>
-                          <p className="text-sm text-gray-600">Expires 12/26</p>
-                        </div>
-                        <Button variant="outline" size="sm">Update</Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-      
-      <Footer />
-    </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    </AppShell>
   );
 }

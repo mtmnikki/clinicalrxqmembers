@@ -1,9 +1,26 @@
 /**
- * Airtable integration for member management
- * Handles member authentication and file access permissions
+ * Minimal Airtable REST client (browser + runtime PAT/Base ID)
+ * - Performs direct fetch calls in the  private transformRecord(record: AirtableRecord): Member {
+    return {
+      id: record.id,
+      email: record.fields.Email,
+      name: record.fields.Name,
+      membershipLevel: record.fields['Membership Level'] as Member['membershipLevel'],
+      accessiblePrograms: record.fields['Accessible Programs'] || [],
+      isActive: record.fields['Is Active'],
+      joinDate: record.fields['Join Date'],
+      passwordHash: record.fields['passwordHash']
+    };
+  }ng Authorization: Bearer <PAT>, matching official docs.
+ * - Enforces Airtable rate limits with a small client-side limiter (5 req/s → 220ms min spacing).
+ * - Adds retry logic for 429 (wait 30s, retry) and 5xx (exponential backoff).
+ * - Uses returnFieldsByFieldId=true for reads so fields are keyed by Field IDs.
  */
 
-interface Member {
+import { getAirtableBaseId, getAirtableToken } from '../config/airtableConfig';
+
+/** Member interface used throughout the service */
+export interface Member {
   id: string;
   email: string;
   name: string;
@@ -14,7 +31,8 @@ interface Member {
   passwordHash?: string;
 }
 
-interface AirtableRecord {
+/** Generic Airtable record keyed by Field IDs */
+export interface AirtableRecord {
   id: string;
   fields: {
     Email: string;
@@ -23,7 +41,7 @@ interface AirtableRecord {
     'Accessible Programs': string[];
     'Is Active': boolean;
     'Join Date': string;
-    'Password Hash'?: string;
+    fldm5mYvdmlB0rYMy?: string; // passwordHash
   };
 }
 
@@ -109,10 +127,9 @@ class AirtableService {
       accessiblePrograms: record.fields['Accessible Programs'] || [],
       isActive: record.fields['Is Active'],
       joinDate: record.fields['Join Date'],
-      passwordHash: record.fields['Password Hash']
+      passwordHash: record.fields.fldm5mYvdmlB0rYMy
     };
   }
 }
 
 export const airtableService = new AirtableService();
-export type { Member };

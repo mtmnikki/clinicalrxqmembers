@@ -34,10 +34,10 @@ export default function Footer() {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-600 to-cyan-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-300 rounded-full flex items-center justify-center">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                   <img 
-                    src="https://pub-cdn.sider.ai/u/U03VH4NVNOE/web-coder/687655a5b1dac45b18db4f5c/resource/d749f31c-6bc0-4053-9a23-63ff4330dc35.png" 
+                    src="https://pub-cdn.sider.ai/u/U03VH4NVNOE/web-coder/687655a5b1dac45b18db4f5c/resource/0fb3f1b8-e6cd-4575-806d-018bad3c9e1a.png" 
                     alt="ClinicalRxQ Logo" 
                     className="w-6 h-6"
                   />
@@ -45,7 +45,7 @@ export default function Footer() {
               </div>
               <div className="text-xl font-bold">
                 <span className="text-white">Clinical</span>
-                <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">RxQ</span>
+                <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-300 bg-clip-text text-transparent">RxQ</span>
               </div>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">

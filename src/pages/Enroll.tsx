@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
 import { Check, CreditCard, Lock } from 'lucide-react';
+import SafeText from '../components/common/SafeText';
 
 export default function Enroll() {
   const [selectedProgram, setSelectedProgram] = useState('clinical-fundamentals');
@@ -71,6 +72,9 @@ export default function Enroll() {
 
   const selectedProgramData = programs.find(p => p.id === selectedProgram);
 
+  /**
+   * Handle billing input change
+   */
   const handleInputChange = (field: string, value: string) => {
     setBillingInfo(prev => ({
       ...prev,
@@ -78,9 +82,13 @@ export default function Enroll() {
     }));
   };
 
+  /**
+   * Handle enrollment submit
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle enrollment submission
+    // eslint-disable-next-line no-console
     console.log('Enrollment submitted', { selectedProgram, billingInfo });
   };
 
@@ -115,15 +123,21 @@ export default function Enroll() {
                         onClick={() => setSelectedProgram(program.id)}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold">{program.title}</h3>
-                          <Badge variant="secondary">{program.duration}</Badge>
+                          <h3 className="font-semibold">
+                            <SafeText value={program.title} />
+                          </h3>
+                          <Badge variant="secondary">
+                            <SafeText value={program.duration} />
+                          </Badge>
                         </div>
-                        <p className="text-2xl font-bold text-blue-600 mb-3">${program.price}</p>
+                        <p className="text-2xl font-bold text-blue-600 mb-3">
+                          ${program.price}
+                        </p>
                         <ul className="space-y-1">
                           {program.features.map((feature, index) => (
                             <li key={index} className="flex items-center gap-2 text-sm">
                               <Check className="h-3 w-3 text-green-500" />
-                              {feature}
+                              <SafeText value={feature} />
                             </li>
                           ))}
                         </ul>
@@ -142,7 +156,7 @@ export default function Enroll() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form id="enrollment-form" onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">First Name</label>
@@ -265,8 +279,12 @@ export default function Enroll() {
                   {selectedProgramData && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="font-semibold">{selectedProgramData.title}</h3>
-                        <p className="text-sm text-gray-600">{selectedProgramData.duration}</p>
+                        <h3 className="font-semibold">
+                          <SafeText value={selectedProgramData.title} />
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          <SafeText value={selectedProgramData.duration} />
+                        </p>
                       </div>
                       
                       <Separator />
